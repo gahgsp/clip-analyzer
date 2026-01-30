@@ -25,6 +25,10 @@ class ClipService:
 
         extracted_frames = self._extract_frames(clip_id, duration, stream_url)
 
+        if duration > 30:
+            raise HTTPException(
+                status_code=400, detail=f"The clip to be analyzed is too long. Maximum length allowed is 30 seconds.")
+
         return {
             "clip_id": clip_id,
             "duration": duration,
@@ -40,8 +44,8 @@ class ClipService:
             clip_id: str = info.get("id", "unknown")
 
             if not stream_url:
-                raise ValueError(
-                    "Failed to resolve the Twitch URL.")
+                raise HTTPException(status_code=500,
+                                    detail=f"Failed to resolve the Twitch URL.")
 
             return clip_id, duration, stream_url
 
