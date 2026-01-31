@@ -5,19 +5,19 @@ from PIL import Image
 
 class AnalysisService:
     def __init__(self):
-        self.model_name = "vikhyatk/moondream2"
-        self.model_revision = "2024-08-26"
+        MODEL_NAME: str = "vikhyatk/moondream2"
+        MODEL_REVISION: str = "2024-08-26"
 
         # AutoModelForCausalLM (Automated Model for Causal Language Modeling)
         # Automatically detects and loads the correct Neural Network architecture based on the model name.
-        self.model = AutoModelForCausalLM.from_pretrained(pretrained_model_name_or_path=self.model_name,
-                                                          revision=self.model_revision,
+        self.model = AutoModelForCausalLM.from_pretrained(pretrained_model_name_or_path=MODEL_NAME,
+                                                          revision=MODEL_REVISION,
                                                           trust_remote_code=True,
                                                           device_map={"": "mps"})
 
         # The Tokenizer acts as the translator converting "human-readable data" to tensors (mathematical arrays) (and vice-versa).
         self.tokenizer = AutoTokenizer.from_pretrained(
-            pretrained_model_name_or_path=self.model_name, revision=self.model_revision)
+            pretrained_model_name_or_path=MODEL_NAME, revision=MODEL_REVISION)
 
     def analyze_frame(self, image_path: str) -> str:
         try:
