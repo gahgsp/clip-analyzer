@@ -23,11 +23,12 @@ class ClipService:
     def process_clip(self, url: str) -> Dict[str, Any]:
         clip_id, duration, stream_url = self._resolve_stream_info(url)
 
-        extracted_frames = self._extract_frames(clip_id, duration, stream_url)
-
+        # For performance reasons, we limit the duration to 30 seconds.
         if duration > 30:
             raise HTTPException(
                 status_code=400, detail=f"The clip to be analyzed is too long. Maximum length allowed is 30 seconds.")
+
+        extracted_frames = self._extract_frames(clip_id, duration, stream_url)
 
         return {
             "clip_id": clip_id,
