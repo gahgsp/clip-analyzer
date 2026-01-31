@@ -6,7 +6,12 @@ class ClipRequest(BaseModel):
     url: str
 
 
+class FrameAnalysis(BaseModel):
+    path: str
+    description: str
+
+
 class ClipResponse(BaseModel):
     clip_id: str
     duration: float
-    frames: List[str]
+    frames: List[FrameAnalysis]
