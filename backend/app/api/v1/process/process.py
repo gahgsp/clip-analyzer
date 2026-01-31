@@ -1,20 +1,20 @@
 from pathlib import Path
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
 from app.model.clip import ClipRequest, ClipResponse, FrameAnalysis
-from app.service import clip_service, analysis_service
 from app.core.exceptions import ClipTooLongError, StreamResolutionError
+from app.service.clip_service import ClipService
+from app.core.dependencies import get_analysis_service, get_clip_service
+from app.service.analysis_service import AnalysisService
 
 FRAMES_DIR = Path("static/frames")
 FRAMES_DIR.mkdir(parents=True, exist_ok=True)
 
 router = APIRouter()
-clip_service = clip_service.ClipService()
-analysis_service = analysis_service.AnalysisService()
 
 
 @router.post(path="/", response_model=ClipResponse)
-def process(request: ClipRequest):
+def process(request: ClipRequest, clip_service: ClipService = Depends(get_clip_service), analysis_service: AnalysisService = Depends(get_analysis_service)):
     try:
         clip_data = clip_service.process_clip(url=request.url)
 
