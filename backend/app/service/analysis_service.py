@@ -1,3 +1,4 @@
+import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from PIL import Image
 
@@ -14,7 +15,9 @@ class AnalysisService:
         self.model = AutoModelForCausalLM.from_pretrained(pretrained_model_name_or_path=self.MODEL_NAME,
                                                           revision=self.MODEL_REVISION,
                                                           trust_remote_code=True,
-                                                          device_map={"": "mps"})
+                                                          device_map=self._get_device_map())
+        print(
+            f"[INFO] Initializing with [model]: {self.MODEL_NAME} and [revision]: {self.MODEL_REVISION}.")
 
         # The Tokenizer acts as the translator converting "human-readable data" to tensors (mathematical arrays) (and vice-versa).
         self.tokenizer = AutoTokenizer.from_pretrained(
@@ -23,6 +26,7 @@ class AnalysisService:
     def analyze_frame(self, image_path: str) -> str:
         try:
             image = Image.open(image_path)
+            print(f"[INFO] Analyzing image located in the path: {image_path}.")
             # Encoding the image in order to transform it from pixels to numeric vectors so the model can properly process this information.
             encoded_image = self.model.encode_image(image)
 
@@ -34,3 +38,17 @@ class AnalysisService:
         except Exception as e:
             raise FrameAnalysisError(
                 f"An error occurred while analyzing the frame {image_path}: {str(e)}.")
+
+    def _get_device_map(self) -> dict:
+        if torch.cuda.is_available():
+            print(
+                "[INFO] CUDA is available and therefore it will be used in the device map.")
+            return {"": "cuda"}
+        elif torch.backends.mps.is_available():
+            print(
+                "[INFO] MPS is available and therefore it will be used in the device map.")
+            return {"": "mps"}
+        else:
+            print(
+                "[INFO] The process will rely in the CPU since CUDA nor MPS is available.")
+            return {"": "cpu"}
