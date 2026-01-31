@@ -3,6 +3,7 @@ from fastapi import APIRouter, HTTPException
 
 from app.model.clip import ClipRequest, ClipResponse, FrameAnalysis
 from app.service import clip_service, analysis_service
+from app.core.exceptions import ClipTooLongError, StreamResolutionError
 
 FRAMES_DIR = Path("static/frames")
 FRAMES_DIR.mkdir(parents=True, exist_ok=True)
@@ -26,5 +27,9 @@ def process(request: ClipRequest):
                 path=frame_path, description=image_description))
 
         return ClipResponse(clip_id=clip_data["clip_id"], duration=clip_data["duration"], frames=analyzed_frames)
-    except HTTPException as e:
-        raise HTTPException(status_code=e.status_code, detail=e.detail)
+    except ClipTooLongError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except StreamResolutionError as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        return HTTPException(status_code=500, detail="An unexpected server error happened.")

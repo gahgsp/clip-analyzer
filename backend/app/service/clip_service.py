@@ -1,8 +1,9 @@
 from pathlib import Path
 from typing import List, Dict, Any, Tuple
 import cv2
-from fastapi import HTTPException
 import yt_dlp
+
+from app.core.exceptions import ClipTooLongError, StreamResolutionError, VideoStreamError
 
 
 class ClipService:
@@ -15,6 +16,7 @@ class ClipService:
         "noplaylist": True,
         "nocheckcertificate": True,
     }
+    CLIP_MAX_DURATION = 30  # The maximum duration in seconds.
 
     def __init__(self):
         # Ensure the directory exists when service is instantiated.
@@ -24,9 +26,9 @@ class ClipService:
         clip_id, duration, stream_url = self._resolve_stream_info(url)
 
         # For performance reasons, we limit the duration to 30 seconds.
-        if duration > 30:
-            raise HTTPException(
-                status_code=400, detail=f"The clip to be analyzed is too long. Maximum length allowed is 30 seconds.")
+        if duration > self.CLIP_MAX_DURATION:
+            raise ClipTooLongError(
+                duration=duration, max_duration=self.CLIP_MAX_DURATION)
 
         extracted_frames = self._extract_frames(clip_id, duration, stream_url)
 
@@ -37,26 +39,33 @@ class ClipService:
         }
 
     def _resolve_stream_info(self, url: str) -> Tuple[str, float, str]:
-        with yt_dlp.YoutubeDL(params=self.OPTIONS_PARAMS) as ydl:
-            info = ydl.extract_info(url=url, download=False)
+        try:
+            with yt_dlp.YoutubeDL(params=self.OPTIONS_PARAMS) as ydl:
+                info = ydl.extract_info(url=url, download=False)
 
-            stream_url: str = info.get("url", "")
-            duration: float = float(info.get("duration", 0.0))
-            clip_id: str = info.get("id", "unknown")
+                stream_url: str = info.get("url", "")
+                duration: float = float(info.get("duration", 0.0))
+                clip_id: str = info.get("id", "unknown")
 
-            if not stream_url:
-                raise HTTPException(status_code=500,
-                                    detail=f"Failed to resolve the Twitch URL.")
+                if not stream_url:
+                    raise StreamResolutionError(
+                        "Could not found the stream URL in the information.")
+                if duration is None or duration <= 0:
+                    raise StreamResolutionError(
+                        f"The stream contains an invalid duration: {duration}.")
 
-            return clip_id, duration, stream_url
+                return clip_id, duration, stream_url
+        except yt_dlp.DownloadError as e:
+            raise StreamResolutionError(
+                f"Failed to extract the information from the stream: {e}.")
 
     def _extract_frames(self, clip_id: str, duration: float, stream_url: str) -> List[str]:
         captured_frames: List[str] = []
         capture = cv2.VideoCapture(filename=stream_url)
 
         if not capture.isOpened():
-            raise HTTPException(
-                status_code=500, detail=f"Could not open the video stream from: {str(stream_url)}.")
+            raise VideoStreamError(
+                f"Could not open the video stream from: {str(stream_url)}.")
 
         try:
             for percentage in self.PERCENTAGES:

@@ -1,23 +1,24 @@
-from fastapi import HTTPException
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from PIL import Image
 
+from app.core.exceptions import FrameAnalysisError
+
 
 class AnalysisService:
-    def __init__(self):
-        MODEL_NAME: str = "vikhyatk/moondream2"
-        MODEL_REVISION: str = "2024-08-26"
+    MODEL_NAME: str = "vikhyatk/moondream2"
+    MODEL_REVISION: str = "2024-08-26"
 
+    def __init__(self):
         # AutoModelForCausalLM (Automated Model for Causal Language Modeling)
         # Automatically detects and loads the correct Neural Network architecture based on the model name.
-        self.model = AutoModelForCausalLM.from_pretrained(pretrained_model_name_or_path=MODEL_NAME,
-                                                          revision=MODEL_REVISION,
+        self.model = AutoModelForCausalLM.from_pretrained(pretrained_model_name_or_path=self.MODEL_NAME,
+                                                          revision=self.MODEL_REVISION,
                                                           trust_remote_code=True,
                                                           device_map={"": "mps"})
 
         # The Tokenizer acts as the translator converting "human-readable data" to tensors (mathematical arrays) (and vice-versa).
         self.tokenizer = AutoTokenizer.from_pretrained(
-            pretrained_model_name_or_path=MODEL_NAME, revision=MODEL_REVISION)
+            pretrained_model_name_or_path=self.MODEL_NAME, revision=self.MODEL_REVISION)
 
     def analyze_frame(self, image_path: str) -> str:
         try:
@@ -27,6 +28,9 @@ class AnalysisService:
 
             return self.model.answer_question(encoded_image,
                                               "Describe what is happening in this image.", self.tokenizer)
+        except FileNotFoundError as e:
+            raise FrameAnalysisError(
+                f"Could not find an image in the following path: {image_path}.")
         except Exception as e:
-            raise HTTPException(
-                status_code=500, detail=f"An error occurred while analyzing the frame {image_path}: {str(e)}.")
+            raise FrameAnalysisError(
+                f"An error occurred while analyzing the frame {image_path}: {str(e)}.")
