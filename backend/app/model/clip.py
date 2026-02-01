@@ -15,3 +15,4 @@ class ClipResponse(BaseModel):
     clip_id: str
     duration: float
     frames: List[FrameAnalysis]
+    summary: str

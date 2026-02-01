@@ -21,15 +21,20 @@ def process(request: ClipRequest, clip_service: ClipService = Depends(get_clip_s
         frame_paths = clip_data["frames"]
         analyzed_frames = []
 
-        for frame_path in frame_paths:
-            image_description = analysis_service.analyze_frame(frame_path)
-            analyzed_frames.append(FrameAnalysis(
-                path=frame_path, description=image_description))
+        analysises = analysis_service.analyze_frames(frame_paths)
 
-        return ClipResponse(clip_id=clip_data["clip_id"], duration=clip_data["duration"], frames=analyzed_frames)
+        for index, frame_path in enumerate(frame_paths):
+            analyzed_frames.append(FrameAnalysis(
+                path=frame_path, description=analysises[index]))
+
+        summary = analysis_service.generate_summary(
+            descriptions=[analyzed_frame.description for analyzed_frame in analyzed_frames])
+
+        return ClipResponse(clip_id=clip_data["clip_id"], duration=clip_data["duration"], frames=analyzed_frames, summary=summary)
     except ClipTooLongError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except StreamResolutionError as e:
         raise HTTPException(status_code=500, detail=str(e))
     except Exception as e:
-        return HTTPException(status_code=500, detail="An unexpected server error happened.")
+        raise HTTPException(
+            status_code=500, detail="An unexpected server error happened.")
