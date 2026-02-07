@@ -28,9 +28,9 @@ automated analysis:
 
 1. **Downloads** the clip and processes the video stream.
 2. **Extracts** key frames at specific intervals.
-3. **Analyzes** each frame using **Moondream2** (a Vision-Language Model) to
-   understand the visual context.
-4. **Summarizes** a cohesive description using **Microsoft Phi-3** (an LLM) to
+3. **Analyzes** each frame using **Moondream2** (VLM) to understand the visual
+   context.
+4. **Summarizes** a cohesive description using **Microsoft Phi-3** (SLM) to
    describe "what happened" in the clip based on the visual data.
 
 ## The AI Pipeline
