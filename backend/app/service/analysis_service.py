@@ -1,17 +1,18 @@
 from typing import Any, Optional
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline
+from transformers import AutoModelForCausalLM, AutoTokenizer
 from PIL import Image
 
 from app.core.exceptions import FrameAnalysisError
+from app.core.config import AnalysisServiceConfiguration
 
 
 class AnalysisService:
-    VISION_MODEL_NAME: str = "vikhyatk/moondream2"
-    VISION_MODEL_REVISION: str = "2024-08-26"
-    REASONING_MODEL_NAME: str = "microsoft/Phi-3-mini-4k-instruct"
+    def __init__(self, configuration: AnalysisServiceConfiguration):
+        self.vision_model_name = configuration.vision_model_name
+        self.vision_model_revision = configuration.vision_model_revision
+        self.reasoning_model_name = configuration.reasoning_model_name
 
-    def __init__(self):
         self._vision_model: Optional[Any] = None
         self._vision_tokenizer: Optional[Any] = None
         self._reasoning_model: Optional[Any] = None
@@ -89,11 +90,11 @@ class AnalysisService:
     def _load_vision_model(self):
         if self._vision_model is None:
             print(
-                f"[INFO] Started loading the Vision Model: {self.VISION_MODEL_NAME}.")
+                f"[INFO] Started loading the Vision Model: {self.vision_model_name}.")
             # AutoModelForCausalLM (Automated Model for Causal Language Modeling)
             # Automatically detects and loads the correct Neural Network architecture based on the model name.
-            self._vision_model = AutoModelForCausalLM.from_pretrained(pretrained_model_name_or_path=self.VISION_MODEL_NAME,
-                                                                      revision=self.VISION_MODEL_REVISION,
+            self._vision_model = AutoModelForCausalLM.from_pretrained(pretrained_model_name_or_path=self.vision_model_name,
+                                                                      revision=self.vision_model_revision,
                                                                       trust_remote_code=True,
                                                                       device_map=self._device_map,
                                                                       low_cpu_mem_usage=True,
@@ -103,17 +104,17 @@ class AnalysisService:
 
             # The Tokenizer acts as the translator converting "human-readable data" to tensors (mathematical arrays) (and vice-versa).
             self._vision_tokenizer = AutoTokenizer.from_pretrained(
-                pretrained_model_name_or_path=self.VISION_MODEL_NAME, revision=self.VISION_MODEL_REVISION)
+                pretrained_model_name_or_path=self.vision_model_name, revision=self.vision_model_revision)
             print(
-                f"[INFO] Finalized loading the Vision Model: {self.VISION_MODEL_NAME}.")
+                f"[INFO] Finalized loading the Vision Model: {self.vision_model_name}.")
 
     def _load_reasoning_model(self):
         if self._reasoning_model is None:
             print(
-                f"[INFO] Started loading the Reasoning Model: {self.REASONING_MODEL_NAME}.")
+                f"[INFO] Started loading the Reasoning Model: {self.reasoning_model_name}.")
             # AutoModelForCausalLM (Automated Model for Causal Language Modeling)
             # Automatically detects and loads the correct Neural Network architecture based on the model name.
-            self._reasoning_model = AutoModelForCausalLM.from_pretrained(pretrained_model_name_or_path=self.REASONING_MODEL_NAME,
+            self._reasoning_model = AutoModelForCausalLM.from_pretrained(pretrained_model_name_or_path=self.reasoning_model_name,
                                                                          device_map=self._device_map,
                                                                          trust_remote_code=True,
                                                                          low_cpu_mem_usage=True,
@@ -124,6 +125,6 @@ class AnalysisService:
 
             # The Tokenizer acts as the translator converting "human-readable data" to tensors (mathematical arrays) (and vice-versa).
             self._reasoning_tokenizer = AutoTokenizer.from_pretrained(
-                pretrained_model_name_or_path=self.REASONING_MODEL_NAME)
+                pretrained_model_name_or_path=self.reasoning_model_name)
             print(
-                f"[INFO] Finalized loading the Reasoning Model: {self.REASONING_MODEL_NAME}.")
+                f"[INFO] Finalized loading the Reasoning Model: {self.reasoning_model_name}.")

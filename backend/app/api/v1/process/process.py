@@ -14,11 +14,13 @@ router = APIRouter()
 
 
 @router.post(path="/", response_model=ClipResponse)
-def process(request: ClipRequest, clip_service: ClipService = Depends(get_clip_service), analysis_service: AnalysisService = Depends(get_analysis_service)):
+def process(request: ClipRequest,
+            clip_service: ClipService = Depends(get_clip_service),
+            analysis_service: AnalysisService = Depends(get_analysis_service)):
     try:
         clip_data = clip_service.process_clip(url=request.url)
 
-        frame_paths = clip_data["frames"]
+        frame_paths = clip_data.frame_paths
         analyzed_frames = []
 
         analysises = analysis_service.analyze_frames(frame_paths)
@@ -30,7 +32,7 @@ def process(request: ClipRequest, clip_service: ClipService = Depends(get_clip_s
         summary = analysis_service.generate_summary(
             descriptions=[analyzed_frame.description for analyzed_frame in analyzed_frames])
 
-        return ClipResponse(clip_id=clip_data["clip_id"], duration=clip_data["duration"], frames=analyzed_frames, summary=summary)
+        return ClipResponse(clip_id=clip_data.clip_id, duration=clip_data.duration, frames=analyzed_frames, summary=summary)
     except ClipTooLongError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except StreamResolutionError as e:
