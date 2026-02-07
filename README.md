@@ -44,6 +44,9 @@ The core of the application relies on a two-step inference process:
 
 ## Project Structure
 
+> [!WARNING]
+> The application UI is not available yet.
+
 - **`/backend`**: The core logic, API, and AI services.
 - **`/frontend`**: An interative UI for users to access it with ease in the
   local environment.
