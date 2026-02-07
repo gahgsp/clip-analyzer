@@ -37,4 +37,4 @@ def process(request: ClipRequest, clip_service: ClipService = Depends(get_clip_s
         raise HTTPException(status_code=500, detail=str(e))
     except Exception as e:
         raise HTTPException(
-            status_code=500, detail="An unexpected server error happened.")
+            status_code=500, detail=f"An unexpected server error happened: {str(e)}.")
