@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Optional
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -5,6 +6,8 @@ from PIL import Image
 
 from app.core.exceptions import FrameAnalysisError
 from app.core.config import AnalysisServiceConfiguration
+
+logger = logging.getLogger(__name__)
 
 
 class AnalysisService:
@@ -19,8 +22,8 @@ class AnalysisService:
         self._reasoning_tokenizer: Optional[Any] = None
         self._device_map = self._get_device_map()
 
-        print(
-            f"[INFO] AnalysisService initialized with device: {self._device_map}.")
+        logger.info(
+            f"AnalysisService initialized with device: {self._device_map}.")
 
     def analyze_frames(self, image_paths: list[str]) -> list[str]:
         try:
@@ -30,14 +33,14 @@ class AnalysisService:
 
             for image_path in image_paths:
                 image = Image.open(image_path)
-                print(
-                    f"[INFO] Analyzing the image located in the path: {image_path}.")
+                logger.info(
+                    f"Analyzing the image located in the path: {image_path}.")
                 # Encoding the image in order to transform it from pixels to numeric vectors so the model can properly process this information.
                 encoded_image = self._vision_model.encode_image(image)
                 analysis.append(self._vision_model.answer_question(encoded_image,
                                                                    "Describe what is happening in this image.", self._vision_tokenizer))
-                print(
-                    f"[INFO] Finalized analyzing the image located in the path: {image_path}.")
+                logger.info(
+                    f"Finalized analyzing the image located in the path: {image_path}.")
 
             return analysis
         except FileNotFoundError as e:
@@ -75,22 +78,22 @@ class AnalysisService:
 
     def _get_device_map(self) -> dict:
         if torch.cuda.is_available():
-            print(
-                "[INFO] CUDA is available and therefore it will be used in the device map.")
+            logger.info(
+                "CUDA is available and therefore it will be used in the device map.")
             return {"": "cuda"}
         elif torch.backends.mps.is_available():
-            print(
-                "[INFO] MPS is available and therefore it will be used in the device map.")
+            logger.info(
+                "MPS is available and therefore it will be used in the device map.")
             return {"": "mps"}
         else:
-            print(
-                "[INFO] The process will rely in the CPU since CUDA nor MPS is available.")
+            logger.info(
+                "The process will rely in the CPU since CUDA nor MPS is available.")
             return {"": "cpu"}
 
     def _load_vision_model(self):
         if self._vision_model is None:
-            print(
-                f"[INFO] Started loading the Vision Model: {self.vision_model_name}.")
+            logger.info(
+                "Started loading the Vision Model: {self.vision_model_name}.")
             # AutoModelForCausalLM (Automated Model for Causal Language Modeling)
             # Automatically detects and loads the correct Neural Network architecture based on the model name.
             self._vision_model = AutoModelForCausalLM.from_pretrained(pretrained_model_name_or_path=self.vision_model_name,
@@ -105,13 +108,13 @@ class AnalysisService:
             # The Tokenizer acts as the translator converting "human-readable data" to tensors (mathematical arrays) (and vice-versa).
             self._vision_tokenizer = AutoTokenizer.from_pretrained(
                 pretrained_model_name_or_path=self.vision_model_name, revision=self.vision_model_revision)
-            print(
-                f"[INFO] Finalized loading the Vision Model: {self.vision_model_name}.")
+            logger.info(
+                f"Finalized loading the Vision Model: {self.vision_model_name}.")
 
     def _load_reasoning_model(self):
         if self._reasoning_model is None:
-            print(
-                f"[INFO] Started loading the Reasoning Model: {self.reasoning_model_name}.")
+            logger.info(
+                f"Started loading the Reasoning Model: {self.reasoning_model_name}.")
             # AutoModelForCausalLM (Automated Model for Causal Language Modeling)
             # Automatically detects and loads the correct Neural Network architecture based on the model name.
             self._reasoning_model = AutoModelForCausalLM.from_pretrained(pretrained_model_name_or_path=self.reasoning_model_name,
@@ -126,5 +129,5 @@ class AnalysisService:
             # The Tokenizer acts as the translator converting "human-readable data" to tensors (mathematical arrays) (and vice-versa).
             self._reasoning_tokenizer = AutoTokenizer.from_pretrained(
                 pretrained_model_name_or_path=self.reasoning_model_name)
-            print(
-                f"[INFO] Finalized loading the Reasoning Model: {self.reasoning_model_name}.")
+            logger.info(
+                f"Finalized loading the Reasoning Model: {self.reasoning_model_name}.")
