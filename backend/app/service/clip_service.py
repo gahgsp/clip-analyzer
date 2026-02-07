@@ -40,6 +40,10 @@ class ClipService:
         )
 
     def _resolve_stream_info(self, url: str) -> Tuple[str, float, str]:
+        if not url or not isinstance(url, str):
+            raise StreamResolutionError(
+                "An invalid URL was provided. Please, check the URL and try again.")
+
         try:
             with yt_dlp.YoutubeDL(params=self.OPTIONS_PARAMS) as ydl:
                 info = ydl.extract_info(url=url, download=False)
