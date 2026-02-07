@@ -61,6 +61,8 @@ class AnalysisService:
         inputs = self._reasoning_tokenizer(
             prompt, return_tensors="pt").to(self._reasoning_model.device)
 
+        logger.info(
+            "Starting the process of generating a summary for the descriptions.")
         with torch.inference_mode():
             output_ids = self._reasoning_model.generate(
                 **inputs,
@@ -69,6 +71,8 @@ class AnalysisService:
                 use_cache=True,
                 eos_token_id=self._reasoning_tokenizer.eos_token_id,
             )
+        logger.info(
+            "Finished the process of generating a summary for descriptions.")
 
         generated_ids = output_ids[0][inputs["input_ids"].shape[-1]:]
 
