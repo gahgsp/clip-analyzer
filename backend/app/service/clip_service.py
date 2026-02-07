@@ -58,7 +58,7 @@ class ClipService:
                 return clip_id, duration, stream_url
         except yt_dlp.DownloadError as e:
             raise StreamResolutionError(
-                f"Failed to extract the information from the stream: {e}.")
+                f"Failed to extract the information from the stream: {str(e)}.")
 
     def _extract_frames(self, clip_id: str, duration: float, stream_url: str) -> List[str]:
         captured_frames: List[str] = []
