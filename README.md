@@ -1,7 +1,7 @@
 # Twitch Clip AI Analyzer
 
-This project is small-scoped application to analyze the visual contents of short
-videos (in this case, clips from the Twitch Platform).
+This project is a small-scoped application to analyze the visual contents of
+short videos (in this case, clips from the Twitch Platform).
 
 I developed this application as a learning project to learn more about applying
 modern AI Engineering techniques.
