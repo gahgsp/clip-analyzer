@@ -16,3 +16,9 @@ class ClipResponse(BaseModel):
     duration: float
     frames: List[FrameAnalysis]
     summary: str
+
+
+class ProcessedClip(BaseModel):
+    clip_id: str
+    duration: float
+    frame_paths: List[str]

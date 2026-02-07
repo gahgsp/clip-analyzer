@@ -4,6 +4,7 @@ import cv2
 import yt_dlp
 
 from app.core.exceptions import ClipTooLongError, StreamResolutionError, VideoStreamError
+from app.model.clip import ProcessedClip
 
 
 class ClipService:
@@ -22,7 +23,7 @@ class ClipService:
         # Ensure the directory exists when service is instantiated.
         self.FRAMES_DIR.mkdir(parents=True, exist_ok=True)
 
-    def process_clip(self, url: str) -> Dict[str, Any]:
+    def process_clip(self, url: str) -> ProcessedClip:
         clip_id, duration, stream_url = self._resolve_stream_info(url)
 
         # For performance reasons, we limit the duration to 30 seconds.
@@ -32,11 +33,11 @@ class ClipService:
 
         extracted_frames = self._extract_frames(clip_id, duration, stream_url)
 
-        return {
-            "clip_id": clip_id,
-            "duration": duration,
-            "frames": extracted_frames
-        }
+        return ProcessedClip(
+            clip_id=clip_id,
+            duration=duration,
+            frame_paths=extracted_frames
+        )
 
     def _resolve_stream_info(self, url: str) -> Tuple[str, float, str]:
         try:
