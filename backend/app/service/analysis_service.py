@@ -113,7 +113,7 @@ class AnalysisService:
                 f"[INFO] Started loading the Reasoning Model: {self.REASONING_MODEL_NAME}.")
             # AutoModelForCausalLM (Automated Model for Causal Language Modeling)
             # Automatically detects and loads the correct Neural Network architecture based on the model name.
-            self._reasoning_model = AutoModelForCausalLM.from_pretrained(pretrained_model_name_or_path="microsoft/Phi-3-mini-4k-instruct",
+            self._reasoning_model = AutoModelForCausalLM.from_pretrained(pretrained_model_name_or_path=self.REASONING_MODEL_NAME,
                                                                          device_map=self._device_map,
                                                                          trust_remote_code=True,
                                                                          low_cpu_mem_usage=True,
@@ -124,6 +124,6 @@ class AnalysisService:
 
             # The Tokenizer acts as the translator converting "human-readable data" to tensors (mathematical arrays) (and vice-versa).
             self._reasoning_tokenizer = AutoTokenizer.from_pretrained(
-                "microsoft/Phi-3-mini-4k-instruct")
+                pretrained_model_name_or_path=self.REASONING_MODEL_NAME)
             print(
                 f"[INFO] Finalized loading the Reasoning Model: {self.REASONING_MODEL_NAME}.")
