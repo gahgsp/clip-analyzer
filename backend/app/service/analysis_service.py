@@ -54,18 +54,23 @@ class AnalysisService:
 
         prompt = f"<|user|>The following is a compiled list of descriptions from frames extracted from a video clip. They are ordered in the same order that the events happened in the video clip. Summary all the descriptions into a single cohesive 2-sentence story about what happened in the clip: {context}<|end|><|assistant|>"
 
-        pipe = pipeline("text-generation", model=self._reasoning_model,
-                        tokenizer=self._reasoning_tokenizer)
+        inputs = self._reasoning_tokenizer(
+            prompt, return_tensors="pt").to(self._reasoning_model.device)
 
-        args = {
-            "max_new_tokens": 100,
-            "return_full_text": False,
-            "do_sample": False,
-            "use_cache": True
-        }
+        with torch.inference_mode():
+            output_ids = self._reasoning_model.generate(
+                **inputs,
+                max_new_tokens=80,
+                do_sample=False,
+                use_cache=True,
+                eos_token_id=self._reasoning_tokenizer.eos_token_id,
+            )
 
-        output = pipe(prompt, **args)
-        return output[0]["generated_text"]
+        generated_ids = output_ids[0][inputs["input_ids"].shape[-1]:]
+
+        return self._reasoning_tokenizer.decode(
+            generated_ids, skip_special_tokens=True
+        ).strip()
 
     def _get_device_map(self) -> dict:
         if torch.cuda.is_available():
