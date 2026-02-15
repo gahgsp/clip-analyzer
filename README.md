@@ -6,6 +6,9 @@ short videos (in this case, clips from the Twitch Platform).
 I developed this application as a learning project to learn more about applying
 modern AI Engineering techniques.
 
+// TODO: ADD about the best practices like API versioning, clean arquitecture,
+separation of concerns, etc.
+
 ## Motivation
 
 The main goal of this project was to deepen my understanding of AI engineering
@@ -20,6 +23,14 @@ practicing the following:
   Vision-Language Models (VLMs) locally on consumer hardware.
 - **AI Pipelines:** Orchestrating multi-step AI tasks (Video -> Frames -> Vision
   Analysis -> Text Summarization).
+
+## What I Applied
+
+- **Clean Architecture / Separation of Concerns**
+- **API Versioning**
+- **Production-Ready Logging System**
+- **Model Performance**: type quantization, device mapping, model singleton
+  strategy
 
 ## What It Does
 
