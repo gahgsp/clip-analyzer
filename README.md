@@ -6,9 +6,6 @@ short videos (in this case, clips from the Twitch Platform).
 I developed this application as a learning project to learn more about applying
 modern AI Engineering techniques.
 
-// TODO: ADD about the best practices like API versioning, clean arquitecture,
-separation of concerns, etc.
-
 ## Motivation
 
 The main goal of this project was to deepen my understanding of AI engineering
