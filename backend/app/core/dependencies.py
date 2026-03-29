@@ -5,9 +5,10 @@ from fastapi import Depends
 from app.service.clip_service import ClipService
 from app.service.analysis_service import AnalysisService
 from app.core.config import AnalysisServiceConfiguration, ClipServiceConfiguration, Settings
+from app.service.lgc_service import LangChainService
 
 
-@lru_cache
+@lru_cache(maxsize=1)
 def get_settings() -> Settings:
     return Settings()
 
@@ -43,3 +44,11 @@ def get_analysis_service(configuration: Annotated[AnalysisServiceConfiguration, 
     if configuration is None:
         configuration = get_analysis_service_configuration()
     return AnalysisService(configuration=configuration)
+
+
+def get_langchain_service(clip_configuration: Annotated[ClipServiceConfiguration, Depends(get_clip_service_configuration)],
+                          analysis_configuration: Annotated[AnalysisServiceConfiguration, Depends(get_analysis_service_configuration)]) -> LangChainService:
+    return LangChainService(
+        clip_configuration=clip_configuration,
+        analysis_configuration=analysis_configuration,
+    )
